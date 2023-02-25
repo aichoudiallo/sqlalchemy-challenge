@@ -45,6 +45,7 @@ def welcome():
 
 @app.route("/api/v1.0/precipitation")
 
+#Station route
 @app.route("/api/v1.0/stations")
 def stations():
     result=session.query(Station.station).all()
@@ -56,7 +57,7 @@ def stations():
 
 
 
-
+#API dynamic route
 @app.route("/api/v1.0/temp/<start>")
 @app.route("/api/v1.0/temp/<start>/<end>")
 def statistics(start=None,end=None):
@@ -77,12 +78,28 @@ def statistics(start=None,end=None):
     temps = list(np.ravel(result))
     return jsonify(temps)
 
+#Precipitation route
+@app.route("/api/v1.0/precipitation")
+
+def precipitation():
+   prev_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+   precipitation = session.query(Measurement.date, Measurement.prcp).\
+    filter(Measurement.date >= prev_year).all()
+   precip = {date: prcp for date, prcp in precipitation}
+   return jsonify(precip)
 
 
 
+#Tobs route
+@app.route("/api/v1.0/tobs")
 
-
-
+def temp_monthly():
+    prev_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+    results = session.query(Measurement.tobs).\
+      filter(Measurement.station == 'USC00519281').\
+      filter(Measurement.date >= prev_year).all()
+    temps = list(np.ravel(results))
+    return jsonify(temps=temps)
 
 
 
